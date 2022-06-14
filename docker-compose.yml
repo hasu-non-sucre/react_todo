@@ -1,0 +1,14 @@
+version: '3'
+
+services:
+  node:
+    image: node:lts
+    container_name: todo
+    volumes:
+      - ./:/usr/src/app
+    command: sh -c "cd todo && npm install && npm run dev"
+    working_dir: /usr/src/app/
+    ports:
+      - "3000:3000"
+    environment:
+      - CHOKIDAR_USEPOLLING=true
