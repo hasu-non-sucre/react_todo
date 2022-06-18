@@ -1,45 +1,29 @@
-import { useState } from 'react'
-import logo from './logo.svg'
-import './App.css'
+import { useState } from "react";
 
-function App() {
-  const [count, setCount] = useState(0)
+type Todo = {
+  value: string;
+};
+
+export const App = () => {
+  // text = ステートの値
+  // setText = ステートの値を更新するメソッド
+  // useState の引数 = ステートの初期値(=空の文字列)
+  const [text, setText] = useState('');
+  const [todos, setTodos] = useState<Todo[]>([]);
 
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>Hello Vite + todo!</p>
-        <p>
-          <button type="button" onClick={() => setCount((count) => count + 1)}>
-            count is: {count}
-          </button>
-        </p>
-        <p>
-          Edit <code>App.tsx</code> and save to test HMR updates.
-        </p>
-        <p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-          {' | '}
-          <a
-            className="App-link"
-            href="https://vitejs.dev/guide/features.html"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Vite Docs
-          </a>
-        </p>
-      </header>
-    </div>
-  )
-}
+    <div>
+      <form onSubmit={(e) => e.preventDefault()}>
+        {/* 
+        入力中テキストの値をtextステートが
+        持っているのでそれをvalueとして表示
 
-export default App
+        onChangeイベント(=イベントテキストの変化)を
+        textステートに反映する
+        */}
+        <input type="text" value={text} onChange={(e) => setText(e.target.value)} />
+        <input type="submit" value="追加" onSubmit={(e) => e.preventDefault} />
+      </form>
+    </div>
+  );
+};
