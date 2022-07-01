@@ -3,7 +3,11 @@ import React, { useState } from "react";
 type Todo = {
   value: string;
   readonly id: number;
+  checked: boolean;
+  removed: boolean;
 };
+
+type Filter = 'all' | 'checked' | 'unchecked' | 'removed';
 
 export const App = () => {
   // text = ステートの値
@@ -11,6 +15,7 @@ export const App = () => {
   // useState の引数 = ステートの初期値(=空の文字列)
   const [text, setText] = useState('');
   const [todos, setTodos] = useState<Todo[]>([]);
+  const [filter, setFilter] = useState<Filter>('all');
 
   // todosステートを更新する関数
   const handleOnSubmit = () => {
@@ -23,6 +28,8 @@ export const App = () => {
     const newTodo: Todo = {
       value: text,
       id: new Date().getTime(),
+      checked: false,
+      removed: false,
     };
 
     setTodos([newTodo, ...todos]);
@@ -35,7 +42,7 @@ export const App = () => {
 
   const handleOnEdit = (id: number, value: string) => {
     // ディープコピー
-    const deepcopy = todos.map((todo) => ({...todo}));
+    const deepcopy = todos.map((todo) => ({ ...todo }));
 
     // idが一致するtodoを書き換える
     const newTodos = deepcopy.map((todo) => {
@@ -49,8 +56,56 @@ export const App = () => {
     setTodos(newTodos);
   };
 
+  const handleOnCheck = (id: number, checked: boolean) => {
+    const deepCopy = todos.map((todo) => ({ ...todo }));
+
+    const newTodos = deepCopy.map((todo) => {
+      if (todo.id === id) {
+        todo.checked = !checked;
+      }
+      return todo;
+    });
+    
+    setTodos(newTodos);
+  };
+
+  const handleOnRemove = (id: number, removed: boolean) => {
+    const deepCopy = todos.map((todo) => ({ ...todo }));
+
+    const newTodos = deepCopy.map((todo) => {
+      if (todo.id === id) {
+        todo.removed = !removed;
+      }
+      return todo;
+    });
+
+    setTodos(newTodos);
+  };
+
+  const filteredTodos = todos.filter((todo) => {
+    // filterステートに応じて異なる内容の配列を返す
+    switch (filter) {
+      case 'all':
+        return !todo.removed;
+      case 'checked':
+        return todo.checked && !todo.removed;
+      case 'unchecked':
+        return !todo.checked && !todo.removed;
+      case 'removed':
+        return todo.removed;
+      default:
+        return todo;
+    }
+  });
+
   return (
     <div>
+      <select defaultValue="all" onChange={(e) => setFilter(e.target.value as Filter)}>
+        <option value="all">全てのタスク</option>
+        <option value="checked">完了したタスク</option>
+        <option value="unchecked">現在のタスク</option>
+        <option value="removed">ごみ箱</option>
+      </select>
       <form onSubmit={(e) => {
         e.preventDefault();
         handleOnSubmit();
@@ -68,7 +123,11 @@ export const App = () => {
       <ul>
         {todos.map((todo) => {
           return <li key={todo.id}>
-            <input type="text" value={todo.value} onChange={(e) => handleOnEdit(todo.id, e.target.value)} />
+            <input type="checkbox" disabled={todo.removed} checked={todo.checked} onChange={() => handleOnCheck(todo.id, todo.checked)} />
+            <input type="text" disabled={todo.checked || todo.removed} value={todo.value} onChange={(e) => handleOnEdit(todo.id, e.target.value)} />
+            <button onClick={() => handleOnRemove(todo.id, todo.removed)}>
+              {todo.removed ? '復元' : '削除'}
+            </button>
           </li>
         })}
       </ul>
